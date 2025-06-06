@@ -15,16 +15,21 @@ logging.basicConfig(
 class ServerCloner:
     def __init__(self, token):
         self.token = token
-        self.bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
+        intents = discord.Intents.default()
+        intents.guilds = True
+        intents.guild_emojis = True
+        intents.guild_messages = True
+        intents.guild_reactions = True
+        intents.guild_presences = True
+        intents.members = True
+        self.bot = commands.Bot(command_prefix='!', intents=intents)
         self.source_guild = None
         self.target_guild = None
 
     async def clone_roles(self):
         try:
-            # Store existing roles to prevent duplicates
             existing_roles = [role.name for role in self.target_guild.roles]
             
-            # Clone roles from source to target
             for role in self.source_guild.roles:
                 if role.name not in existing_roles and role.name != "@everyone":
                     try:
@@ -36,11 +41,14 @@ class ServerCloner:
                             mentionable=role.mentionable
                         )
                         logging.info(f"Created role: {role.name}")
-                        await asyncio.sleep(1)  # Respect rate limits
+                        print(f"Created role: {role.name}")
+                        await asyncio.sleep(1)
                     except Exception as e:
                         logging.error(f"Error creating role {role.name}: {str(e)}")
+                        print(f"Error creating role {role.name}: {str(e)}")
         except Exception as e:
             logging.error(f"Error in clone_roles: {str(e)}")
+            print(f"Error in clone_roles: {str(e)}")
 
     async def clone_categories_and_channels(self):
         try:
